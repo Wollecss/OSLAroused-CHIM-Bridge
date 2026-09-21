@@ -13,15 +13,19 @@ affinity a configurable **Lust Override** prompt says so.
 Win it by being charming, lose it by being crass, and watch a courtship actually go somewhere
 instead of a relationship meter ticking up on rails.
 
-### This is not inherently an NSFW mod
+### How far it goes is up to you
 
-It ships nothing explicit and requires no adult content. What it adds is a social system — attraction,
-regard, and the tension between them — expressed entirely through how NPCs speak to you. Most of what
-it produces is flirtation, awkwardness, warmth and rejection.
+This mod ships nothing explicit. What it provides is the underlying system — attraction, regard, and
+the tension between them — and what that becomes depends entirely on your setup.
 
-It is *compatible* with adult setups: OSLAroused arousal is shared with whatever else reads it, and
-an optional SHARMAT mode exists for people already running that. Both are opt-in. Left alone, this is
-a courtship layer for ordinary conversation.
+**On its own** it is a courtship layer for ordinary conversation: flirtation, warmth, awkwardness and
+rejection, expressed through how NPCs speak to you. Perfectly at home in a completely clean modlist.
+
+**With adult mods installed** it feeds straight into them. The arousal it moves is native OSLAroused,
+shared with everything else that reads it, and the optional SHARMAT mode lets an NPC's tracked
+arousal carry real weight in that system.
+
+Neither is the intended use — both are. The mod supplies the dynamic; you decide what it drives.
 
 Written against CommonLibSSE-NG. Works standalone: **no dependency on SHARMAT**, with an opt-in
 compatibility mode for people who run it.
