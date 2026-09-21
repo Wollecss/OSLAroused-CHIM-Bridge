@@ -7,8 +7,8 @@ tracked **affinity**. When arousal runs far enough ahead of affinity, a configur
 prompt is injected — an NPC who wants you more than they like you speaks differently from one who
 feels both.
 
-Written against CommonLibSSE-NG. Works standalone: **no dependency on SHARMAT or MinAI**, with an
-opt-in compatibility mode for people who run them.
+Written against CommonLibSSE-NG. Works standalone: **no dependency on SHARMAT**, with an opt-in
+compatibility mode for people who run it.
 
 ---
 
