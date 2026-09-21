@@ -17,3 +17,15 @@ cmake-build*
 
 # Skyrim archive files
 *.bsa
+
+# Build logs and packaged releases
+build_output.txt
+dist/
+
+# Local tooling and notes, not part of the mod
+build_plugin.bat
+CLAUDE.md
+phrases to use on npc.txt
+
+# Runtime state written by the server extension, never source
+plugin/ext/oslaroused_bridge/state.json

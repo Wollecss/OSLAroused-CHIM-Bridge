@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.21)
 
 # [BEGIN set_project_name]
 # Set your project name. This will be the name of your SKSE .dll file.
-project(HelloWorld VERSION 0.0.1 LANGUAGES CXX)
+project(CHIM_OSLAroused_Bridge VERSION 0.1.0 LANGUAGES CXX)
 
 # [END set_project_name]
 
@@ -30,8 +30,14 @@ endif()
 #
 # To do this automatically, set the `SKYRIM_MODS_FOLDER` environment variable
 # to the path of your "mods" folder
+#
+# The MO2 mod folder is named with spaces/hyphens ("CHIM - OSLAroused Bridge") to match this
+# project's own naming convention on Nexus/LoversLab-style mod pages, which CMake target names
+# can't safely contain - so this is set explicitly rather than derived from ${PROJECT_NAME}.
+# This is also where the ESP, Papyrus quest, and HerikaServer extension source already live;
+# the SKSE plugin built here just joins them in the same folder.
 if(DEFINED ENV{SKYRIM_MODS_FOLDER} AND IS_DIRECTORY "$ENV{SKYRIM_MODS_FOLDER}")
-    set(OUTPUT_FOLDER "$ENV{SKYRIM_MODS_FOLDER}/${PROJECT_NAME}")
+    set(OUTPUT_FOLDER "$ENV{SKYRIM_MODS_FOLDER}/CHIM - OSLAroused Bridge")
 endif()
 
 # Otherwise, you can set OUTPUT_FOLDER to any place you'd like :)
@@ -39,7 +45,7 @@ endif()
 
 # Setup your SKSE plugin as an SKSE plugin!
 find_package(CommonLibSSE CONFIG REQUIRED)
-add_commonlibsse_plugin(${PROJECT_NAME} SOURCES plugin.cpp) # <--- specifies plugin.cpp
+add_commonlibsse_plugin(${PROJECT_NAME} SOURCES plugin.cpp src/DevBench/DevBenchAPI.cpp) # <--- specifies plugin.cpp
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23) # <--- use C++23 standard
 target_precompile_headers(${PROJECT_NAME} PRIVATE PCH.h) # <--- PCH.h is required!
 

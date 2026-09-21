@@ -1,0 +1,49 @@
+# Skyrim SKSE Plugin Development (CommonLibSSE-NG)
+
+You are developing a native Skyrim Special Edition / Anniversary Edition SKSE plugin using CommonLibSSE-NG.
+
+## Project
+
+- Project root: H:/Nolvus Awakening/PROJECTS/MySkyrimPlugin
+- CMake project name: HelloWorld
+- Main source file: plugin.cpp
+- Precompiled header: PCH.h
+- C++ standard: C++23
+- vcpkg dependency: commonlibsse-ng
+- Target triplet: x64-windows-static-md
+
+## Code Conventions & Architecture
+
+1. Namespaces
+   - RE:: — reverse-engineered Skyrim engine classes, forms, structs, and events (e.g. RE::PlayerCharacter, RE::Actor, RE::TESObjectWEAP, RE::ConsoleLog, RE::TESEquipEvent).
+   - SKSE:: — plugin lifecycle, interfaces, messaging, trampolines, and logging (e.g. SKSE::GetMessagingInterface(), SKSE::Trampoline, SKSE::Init()).
+
+2. Precompiled Headers
+   - PCH.h already includes RE/Skyrim.h and SKSE/SKSE.h.
+   - Do not redundantly re-include those headers in .cpp files.
+
+3. Header Reference Locations
+   - Primary project-local headers:
+     H:/Nolvus Awakening/PROJECTS/MySkyrimPlugin/build/release/vcpkg_installed/x64-windows-static-md/include/
+   - Global vcpkg package headers (fallback):
+     C:/vcpkg/packages/commonlibsse-ng_x64-windows-static-md/include/
+   - If you are unsure of a class member function, offset, or event signature, grep or read the corresponding header under the RE/ or SKSE/ directories before generating code. Never guess function signatures or member variable names.
+
+4. Build & Deploy
+   - Configure: cmake --preset release
+   - Build: cmake --build H:/Nolvus Awakening/PROJECTS/MySkyrimPlugin/build/release
+   - Output .dll is HelloWorld.dll.
+   - If SKYRIM_MODS_FOLDER is set, the build automatically copies the .dll to <SKYRIM_MODS_FOLDER>/HelloWorld/SKSE/Plugins/.
+   - If the automatic deploy is not configured, copy HelloWorld.dll from the build directory to the mod SKSE/Plugins/ folder manually.
+
+5. Verification
+   - After building, verify HelloWorld.dll exists in the build output or in the mod SKSE/Plugins/ folder.
+   - Launch Skyrim via SKSE and check the ~ console or log file for expected output.
+
+## When modifying code
+
+- Prefer CommonLibSSE-NG abstractions over raw memory addresses.
+- Use SKSE::GetMessagingInterface()->RegisterListener(...) for kDataLoaded and other SKSE message callbacks.
+- Use RE::ConsoleLog::GetSingleton()->Print(...) for debug console output.
+- Use SKSE::log::info(...) etc. for file logging when a logger is configured.
+- Keep changes minimal and buildable; always run the build after editing and fix compiler errors by consulting the headers.

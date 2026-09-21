@@ -1,105 +1,152 @@
-# SKSE "Hello, world!"
+# CHIM - OSLAroused Bridge
 
-Very simple C++ SKSE plugin for Skyrim!
+**Lets CHIM's LLM move an NPC's real arousal, and lets that arousal shape how they talk to you.**
+
+During conversation, CHIM can adjust an NPC's native **OSLAroused** arousal and this bridge's own
+tracked **affinity**. When arousal runs far enough ahead of affinity, a configurable **Lust Override**
+prompt is injected — an NPC who wants you more than they like you speaks differently from one who
+feels both.
+
+Written against CommonLibSSE-NG. Works standalone: **no dependency on SHARMAT or MinAI**, with an
+opt-in compatibility mode for people who run them.
 
 ---
 
-- [SKSE "Hello, world!"](#skse-hello-world)
-- [What does it do?](#what-does-it-do)
-- [CommonLibSSE NG](#commonlibsse-ng)
-- [Requirements](#requirements)
-  - [Opening the project](#opening-the-project)
-- [Project setup](#project-setup)
-  - [Finding Your "`mods`" Folder](#finding-your-mods-folder)
-- [Setup your own repository](#setup-your-own-repository)
-- [Sharing is Caring](#sharing-is-caring)
+## How it actually works
 
-# What does it do?
+Three components, and none of them is optional.
 
-After running Skyrim, once at the Main Menu, press the `~` key to open the game console.
+**The SKSE plugin** (`CHIM_OSLAroused_Bridge.dll`) tails HerikaServer's `output_to_plugin.log`,
+parses `CHIM_ApplyDynamics@...` events and writes the arousal delta straight to native OSLAroused
+through the Papyrus VM. **This is the only thing in the chain that moves the real arousal value.**
 
-You will see that we printed `"Hello, world!"` to the console at the Main Menu 🐉
+**The quest script** (`CHIM_OSLAroused_Bridge.psc`) reports back. Every 0.25 game-hours its
+`OnUpdate` loop broadcasts each nearby actor's *actual* OSLAroused arousal to the server as
+`oslaroused_state@Actor@arousal`, which keeps the stats and the Lust Override prompt honest rather
+than guessing from what was last written.
 
-# CommonLibSSE NG
+> The same script also registers for the `CHIM_CommandReceived` mod event intending to apply
+> dynamics itself — but AIAgent only ever broadcasts that event for its own `ExtCmd*` commands,
+> never for `CHIM_ApplyDynamics`, so **that half never fires**. It is left in place deliberately and
+> documented here so nobody spends an afternoon working out why it appears to do nothing.
 
-Because this uses [CommonLibSSE NG](https://github.com/CharmedBaryon/CommonLibSSE-NG), it supports Skyrim SE, AE, GOG, and VR.
+**The HerikaServer extension** (`plugin/ext/oslaroused_bridge/`) registers the
+`EvaluateEmotionalDynamics` action the LLM calls, enforces the WebUI's toggles, clamps and
+cooldowns, and injects the stats and Lust Override context.
 
-[CommonLibSSE NG](https://github.com/CharmedBaryon/CommonLibSSE-NG) is a fork of the popular [powerof3 fork](https://github.com/powerof3/CommonLibSSE) of the _original_ `CommonLibSSE` library created by [Ryan McKenzie](https://github.com/Ryan-rsm-McKenzie) in [2018](https://github.com/Ryan-rsm-McKenzie/CommonLibSSE/commit/224773c424bdb8e36c761810cdff0fcfefda5f4a).
+In short: **the plugin writes, the quest reports, the server decides.**
 
-# Requirements
+---
 
-- [Visual Studio 2022](https://visualstudio.microsoft.com/) (_the free Community edition_)
-- [`vcpkg`](https://github.com/microsoft/vcpkg)
-  - 1. Clone the repository using git OR [download it as a .zip](https://github.com/microsoft/vcpkg/archive/refs/heads/master.zip)
-  - 2. Go into the `vcpkg` folder and double-click on `bootstrap-vcpkg.bat`
-  - 3. Edit your system or user Environment Variables and add a new one:
-    - Name: `VCPKG_ROOT`  
-      Value: `C:\path\to\wherever\your\vcpkg\folder\is`
+## Repository layout
 
-<img src="https://raw.githubusercontent.com/SkyrimDev/Images/main/images/screenshots/Setting%20Environment%20Variables/VCPKG_ROOT.png" height="150">
+```
+├── src/  plugin.cpp  PCH.h  CMakeLists.txt   C++ source for the SKSE plugin
+├── papyrus/                                  quest script source and compiled .pex
+├── esp/                                      the Start-Game-Enabled quest plugin
+├── plugin/ext/oslaroused_bridge/             HerikaServer extension
+│   ├── functions.php          registers EvaluateEmotionalDynamics, applies toggles/clamps/cooldown
+│   ├── preprocessing.php      ingests the quest's oslaroused_state@ broadcasts
+│   ├── context_pre.php        injects stats and the Lust Override prompt
+│   ├── json_response_custom.php   registers the action's fields with CHIM's structured-output
+│   │                              schema (auto-loaded by CHIM core - must ship even though
+│   │                              nothing here calls it directly)
+│   ├── config.php             the WebUI
+│   └── settings.json / manifest.json
+├── tools/xedit/                              generates the quest ESP from scratch (one-off)
+└── install.sh  compile.sh  verify.sh         build and deploy helpers, WSL-side
+```
 
-## Opening the project
+The server extension here is the copy that ships with the mod, kept in sync with what is installed.
+**If you edit the live server copy directly, copy your changes back here before packaging a
+release** — `install.sh` copies one way only.
 
-Once you have Visual Studio 2022 installed, you can open this folder in basically any C++ editor, e.g. [VS Code](https://code.visualstudio.com/) or [CLion](https://www.jetbrains.com/clion/) or [Visual Studio](https://visualstudio.microsoft.com/)
-- > _for VS Code, if you are not automatically prompted to install the [C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) and [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) extensions, please install those and then close VS Code and then open this project as a folder in VS Code_
+---
 
-You may need to click `OK` on a few windows, but the project should automatically run CMake!
+## Requirements
 
-It will _automatically_ download [CommonLibSSE NG](https://github.com/CharmedBaryon/CommonLibSSE-NG) and everything you need to get started making your new plugin!
+| | |
+| --- | --- |
+| **SKSE64** | Required |
+| **CHIM / HerikaServer** | Required |
+| **OSLAroused** | Required — the arousal values are its own |
+| SHARMAT (AIagentNSFW) | *Optional.* Only for the compatibility mode below |
 
-# Project setup
+---
 
-By default, when this project compiles it will output a `.dll` for your SKSE plugin into the `build/` folder.
+## Install
 
-If you want to configure this project to output your plugin files
-into your Skyrim Special Edition's "`Data`" folder:
+**1. Deploy the HerikaServer extension** (from WSL):
 
-- Set the `SKYRIM_FOLDER` environment variable to the path of your Skyrim installation  
-  e.g. `C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition`
+```sh
+bash "/mnt/<drive>/<path to this repo>/install.sh"
+```
 
-<img src="https://raw.githubusercontent.com/SkyrimDev/Images/main/images/screenshots/Setting%20Environment%20Variables/SKYRIM_FOLDER.png" height="150">
+**2. Install the mod** in Mod Organizer 2 or Vortex, and enable the ESP **after** `AIAgent.esp` and
+`OSLAroused.esp` in your load order.
 
-If you want to configure this project to output your plugin files
-into your "`mods`" folder:  
-(_for Mod Organizer 2 or Vortex_)
+**3. Start Skyrim.** The quest auto-starts, and the plugin logs to
+`Documents/My Games/Skyrim Special Edition/SKSE/CHIM_OSLAroused_Bridge.log`.
 
-- Set the `SKYRIM_MODS_FOLDER` environment variable to the path of your mods folder:  
-  e.g. `C:\Users\<user>\AppData\Local\ModOrganizer\Skyrim Special Edition\mods`  
-  e.g. `C:\Users\<user>\AppData\Roaming\Vortex\skyrimse\mods`
+The ESP and the compiled `.pex` are prebuilt — you only need `compile.sh` if you change the `.psc`.
 
-<img src="https://raw.githubusercontent.com/SkyrimDev/Images/main/images/screenshots/Setting%20Environment%20Variables/SKYRIM_MODS_FOLDER.png" height="150">
+---
 
-## Finding Your "`mods`" Folder
+## Building the SKSE plugin
 
-In Mod Organizer 2:
+Requires CMake, Ninja and a C++23 MSVC toolchain; dependencies come from vcpkg.
 
-> Click the `...` next to "Mods" to get the full folder path
+```sh
+cmake --preset release
+cmake --build build/release
+```
 
-<img src="https://raw.githubusercontent.com/SkyrimDev/Images/main/images/screenshots/MO2/MO2SettingsModsFolder.png" height="150">
+Set `SKYRIM_MODS_FOLDER` (or `SKYRIM_FOLDER`) and the build drops the DLL straight into the mod's
+`SKSE/Plugins/`, so the usual loop is *build, alt-tab, reload a save*.
 
-In Vortex:
+---
 
-<img src="https://raw.githubusercontent.com/SkyrimDev/Images/main/images/screenshots/Vortex/VortexSettingsModsFolder.png" height="150">
+## Configuration
 
-# Setup your own repository
+`http://localhost:8081/HerikaServer/ext/oslaroused_bridge/config.php`
 
-If you clone this template on GitHub, please:
+- **Dynamics Control** — stats injection, Lust Override threshold, per-dimension enable, clamps and
+  affinity scaling
+- **Cooldowns & Notifications** — per-actor gain cooldown, in-game notification and scene-skip
+  toggles
+- **Sharmat Compatibility** — lets an NPC's tracked arousal bypass SHARMAT's affinity and
+  relationship-type gate for that NPC specifically. **Off by default**, and requires SHARMAT
+  AIagentNSFW; without it this section does nothing at all
 
-- Go into `LICENSE` and change the year and change `<YOUR NAME HERE>` to your name.
-- Go into `CODE_OF_CONDUCT.md` and change `<YOUR CONTACT INFO HERE>` to your contact information.
+---
 
-The `LICENSE` defaults to using the [MIT License](https://choosealicense.com/licenses/mit/), a permissive license which is used by many popular Skyrim mods (_including [CommonLibSSE](https://github.com/Ryan-rsm-McKenzie/CommonLibSSE)_).
+## Verification
 
-The `CODE_OF_CONDUCT.md` defaults to using the [Contributor Covenant](https://www.contributor-covenant.org/), the most popular code of conduct for open source communities.
+```sh
+bash   "<path to this repo>/verify.sh"
+```
 
-If you'd like to know more about open source licenses, see:
-- [Licensing a repository](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository)
-- [Choose an open source license](https://choosealicense.com/)
+The plugin's log is deliberately talkative: it records every parsed event, the delta applied and the
+actor it landed on. If an adjustment does not appear to happen, the log says why rather than failing
+silently.
 
-# Sharing is Caring
+---
 
-**If you use this template, PLEASE release your project as a public open source project.** 💖
+## Notes for contributors
 
-**Please do not release your SKSE plugin on Nexus/etc without making the source code available** \*
+**`state.json` is owned by the PHP extension.** The SKSE plugin reads it once at boot to seed its
+in-memory cache and never writes it — writing from the game side would clobber the server's data.
 
-> \* _You do you. But please help our community by sharing your source `<3`_
+**Payloads are pipe-delimited, not JSON:**
+`CHIM_ApplyDynamics@Actor|DeltaArousal|DeltaAffinity|Tag|Reason`
+
+**Logs written from WSL carry CRLF line endings.** Anything parsing them must trim `\r` as well as
+`\n`.
+
+---
+
+## License
+
+See [LICENSE](LICENSE). The scaffolding began as
+[HelloWorld-using-CommonLibSSE-NG](https://github.com/SkyrimDev/HelloWorld-using-CommonLibSSE-NG);
+the vendored DevBench API in `src/DevBench/` carries its own licence notice.
