@@ -1,11 +1,27 @@
 # CHIM - OSLAroused Bridge
 
-**Lets CHIM's LLM move an NPC's real arousal, and lets that arousal shape how they talk to you.**
+**A flirting minigame for CHIM.** How an NPC feels about you changes as you talk, and changes how
+they talk back.
 
-During conversation, CHIM can adjust an NPC's native **OSLAroused** arousal and this bridge's own
-tracked **affinity**. When arousal runs far enough ahead of affinity, a configurable **Lust Override**
-prompt is injected — an NPC who wants you more than they like you speaks differently from one who
-feels both.
+Two dimensions are tracked separately: **attraction** (native OSLAroused arousal) and **affinity**
+(this bridge's own measure of how much they actually like you). The LLM moves both during
+conversation, based on what you say and how you say it — and the *gap between them* is what gives
+the system its character. Someone who likes you and is drawn to you is warm. Someone drawn to you
+who barely knows you is something else entirely, and when attraction runs far enough ahead of
+affinity a configurable **Lust Override** prompt says so.
+
+Win it by being charming, lose it by being crass, and watch a courtship actually go somewhere
+instead of a relationship meter ticking up on rails.
+
+### This is not inherently an NSFW mod
+
+It ships nothing explicit and requires no adult content. What it adds is a social system — attraction,
+regard, and the tension between them — expressed entirely through how NPCs speak to you. Most of what
+it produces is flirtation, awkwardness, warmth and rejection.
+
+It is *compatible* with adult setups: OSLAroused arousal is shared with whatever else reads it, and
+an optional SHARMAT mode exists for people already running that. Both are opt-in. Left alone, this is
+a courtship layer for ordinary conversation.
 
 Written against CommonLibSSE-NG. Works standalone: **no dependency on SHARMAT**, with an opt-in
 compatibility mode for people who run it.
