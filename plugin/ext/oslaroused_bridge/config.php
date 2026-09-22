@@ -150,7 +150,8 @@ details.section .section-body{padding:0 16px 16px}
 <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="notifications_enabled" <?= !empty($settings['notifications_enabled']) ? 'checked' : '' ?>> Show in-game notifications</label></div>
 <p class="hint">Read once by the SKSE plugin at game load. Toggling this here takes effect on your next Skyrim launch, not immediately.</p>
 <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="skip_during_scene_enabled" <?= !empty($settings['skip_during_scene_enabled']) ? 'checked' : '' ?>> Skip arousal writes while the actor is in an OStim/SexLab scene</label></div>
-<p class="hint">Avoids double-dipping with SexLab/OStim's own arousal changes for the same scene. Also read once at game load.</p>
+<p class="hint">Avoids double-dipping with SexLab/OStim's own arousal changes for the same scene. Also read once at game load.
+<strong style="color:#e8c547">Using SLO Aroused NG instead of OSLAroused?</strong> Its compatibility stub doesn't implement the scene-check function this setting relies on, so leave this <strong>unchecked</strong> - otherwise arousal writes will silently stop being applied while this is on. (Real OSLAroused users: leave it checked as normal.)</p>
 </div>
 </details>
 

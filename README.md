@@ -89,8 +89,12 @@ release** — `install.sh` copies one way only.
 | --- | --- |
 | **SKSE64** | Required |
 | **CHIM / HerikaServer** | Required |
-| **OSLAroused** | Required — the arousal values are its own |
+| **OSLAroused**, or SLO Aroused NG | Required — the arousal values are its own. The plugin calls by script name, not ESP, so SLOA's `OSLArousedNative` stub works too |
 | SHARMAT (AIagentNSFW) | *Optional.* Only for the compatibility mode below |
+
+> **Using SLO Aroused NG?** Turn **off** `skip_during_scene_enabled` in the WebUI. SLOA's stub
+> doesn't implement the scene-check that setting relies on, so leaving it on silently drops every
+> arousal write while an actor is in a scene. Real OSLAroused users leave it on as normal.
 
 ---
 

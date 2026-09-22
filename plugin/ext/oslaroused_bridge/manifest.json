@@ -1,7 +1,7 @@
 {
     "name": "oslaroused_bridge",
     "display_name": "CHIM - OSLAroused Bridge",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "author": "Wollecs",
     "description": "LLM-controlled arousal/affinity dynamics using OSLAroused, with Lust Override prompt injection when arousal exceeds affinity thresholds.",
     "config_url": "/HerikaServer/ext/oslaroused_bridge/config.php",
